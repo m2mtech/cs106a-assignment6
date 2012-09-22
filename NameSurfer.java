@@ -9,15 +9,38 @@ import acm.program.*;
 import java.awt.event.*;
 import javax.swing.*;
 
-public class NameSurfer extends Program implements NameSurferConstants {
+public class NameSurfer extends ConsoleProgram implements NameSurferConstants {
 
+	/**
+	 * private constants
+	 */
+	private static final String POSITION_OF_INTERACTORS = NORTH;
+	private static final int N_CHARS_NAMEFIELD = 20;
+	
+	/**
+	 * private instance variables
+	 */
+	private JTextField nameField;
+	private JButton graphButton;
+	private JButton clearButton;
+	
 	/* Method: init() */
 	/**
 	 * This method has the responsibility for reading in the data base
 	 * and initializing the interactors at the top of the window.
 	 */
 	public void init() {
-	    // You fill this in, along with any helper methods //
+		nameField = new JTextField(N_CHARS_NAMEFIELD);
+	    nameField.addActionListener(this);
+	    graphButton = new JButton("Graph");
+	    clearButton = new JButton("Clear");
+	   
+	    add(new JLabel("Name:"), POSITION_OF_INTERACTORS);
+	    add(nameField, POSITION_OF_INTERACTORS);
+	    add(graphButton, POSITION_OF_INTERACTORS);
+	    add(clearButton, POSITION_OF_INTERACTORS);
+	    
+		addActionListeners();
 	}
 
 	/* Method: actionPerformed(e) */
@@ -27,6 +50,12 @@ public class NameSurfer extends Program implements NameSurferConstants {
 	 * button actions.
 	 */
 	public void actionPerformed(ActionEvent e) {
-		// You fill this in //
+		Object source = e.getSource();
+		if ((source == nameField) || (source == graphButton)) {
+			println("Graph: \"" + nameField.getText() + "\"");
+		} else if (source == clearButton) {
+			println("Clear");
+		}
 	}
+
 }
