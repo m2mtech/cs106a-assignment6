@@ -23,6 +23,7 @@ public class NameSurfer extends ConsoleProgram implements NameSurferConstants {
 	private JTextField nameField;
 	private JButton graphButton;
 	private JButton clearButton;
+	private NameSurferDataBase dataBase;
 	
 	/* Method: init() */
 	/**
@@ -30,6 +31,8 @@ public class NameSurfer extends ConsoleProgram implements NameSurferConstants {
 	 * and initializing the interactors at the top of the window.
 	 */
 	public void init() {
+		dataBase = new NameSurferDataBase(NAMES_DATA_FILE);
+		
 		nameField = new JTextField(N_CHARS_NAMEFIELD);
 	    nameField.addActionListener(this);
 	    graphButton = new JButton("Graph");
@@ -52,13 +55,14 @@ public class NameSurfer extends ConsoleProgram implements NameSurferConstants {
 	public void actionPerformed(ActionEvent e) {
 		Object source = e.getSource();
 		if ((source == nameField) || (source == graphButton)) {
-			//println("Graph: \"" + nameField.getText() + "\"");
-			NameSurferEntry entry = new NameSurferEntry(nameField.getText());
+			//println("Graph: \"" + nameField.getText() + "\"");			
+			/*NameSurferEntry entry = new NameSurferEntry(nameField.getText());
 			println(entry.getName());
 			println(entry.getRank(0));
 			println(entry.getRank(NDECADES - 2));
 			println(entry.getRank(NDECADES));
-			println(entry.toString());
+			println(entry.toString());*/
+			println("Graph: \"" + dataBase.findEntry(nameField.getText()) + "\"");
 		} else if (source == clearButton) {
 			println("Clear");
 		}

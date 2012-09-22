@@ -1,3 +1,9 @@
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.Scanner;
+import java.util.TreeMap;
+
 /*
  * File: NameSurferDataBase.java
  * -----------------------------
@@ -11,6 +17,11 @@
 
 public class NameSurferDataBase implements NameSurferConstants {
 	
+	/**
+	 * private instance variables
+	 */
+	private TreeMap<String,NameSurferEntry> data = new TreeMap<String,NameSurferEntry>();
+	
 	/* Constructor: NameSurferDataBase(filename) */
 	/**
 	 * Creates a new NameSurferDataBase and initializes it using the
@@ -19,7 +30,19 @@ public class NameSurferDataBase implements NameSurferConstants {
 	 * occurs as the file is being read.
 	 */
 	public NameSurferDataBase(String filename) {
-		// You fill this in //
+		File file = new File(filename);
+		try {
+			Scanner scanner = new Scanner(new FileReader(file));
+			while (scanner.hasNextLine()) {
+				NameSurferEntry entry = new NameSurferEntry(scanner.nextLine());
+				String name = entry.getName().toLowerCase();
+				if (!name.equals("error"))
+					data.put(name, entry);
+			}
+			scanner.close();
+		} catch (IOException ex) {
+			// don't care do nothing
+		}
 	}
 	
 	/* Method: findEntry(name) */
@@ -29,8 +52,7 @@ public class NameSurferDataBase implements NameSurferConstants {
 	 * method returns null.
 	 */
 	public NameSurferEntry findEntry(String name) {
-		// You need to turn this stub into a real implementation //
-		return null;
+		return data.get(name.toLowerCase());
 	}
 }
 
