@@ -17,11 +17,22 @@ public class NameSurferGraph extends GCanvas
 implements NameSurferConstants, ComponentListener {
 
 	/**
+	 * private constants
+	 */
+	private static final int LABEL_OFFSET = 3;
+	private static final Color[] COLORS = {Color.BLACK, Color.RED, Color.BLUE, Color.MAGENTA};
+	private static final int N_COLORS = 4;
+	
+	/**
+	 * private instance variables
+	 */
+	private ArrayList<NameSurferEntry> data = new ArrayList<NameSurferEntry>();
+
+	/**
 	 * Creates a new NameSurferGraph object that displays the data.
 	 */
 	public NameSurferGraph() {
 		addComponentListener(this);
-		// You fill in the rest //
 	}
 
 
@@ -29,7 +40,8 @@ implements NameSurferConstants, ComponentListener {
 	 * Clears the list of name surfer entries stored inside this class.
 	 */
 	public void clear() {
-		// You fill this in //
+		data.clear();
+		update();
 	}
 
 
@@ -40,7 +52,11 @@ implements NameSurferConstants, ComponentListener {
 	 * simply stores the entry; the graph is drawn by calling update.
 	 */
 	public void addEntry(NameSurferEntry entry) {
-		// You fill this in //
+		if (entry == null) return;
+		if (data.contains(entry)) return;
+		data.add(entry);
+		//System.out.println(entry);
+		update();
 	}
 
 
@@ -54,8 +70,70 @@ implements NameSurferConstants, ComponentListener {
 	public void update() {
 		removeAll();
 		drawGrid();
+		Iterator<NameSurferEntry> it = data.iterator();
+		while (it.hasNext()) {
+			drawEntry(it.next());
+		}
+	}
+	
+	/**
+	 * draw graph of entry
+	 * @param entry
+	 */
+	private void drawEntry(NameSurferEntry entry) {
+		String name = entry.getName();
+		int rank = entry.getRank(0);
+		double dx = getWidth() * 1.0 / NDECADES;
+		double x0 = 0;
+		double y0 = yValue(rank);
+		Color color = COLORS[data.indexOf(entry) % N_COLORS];
+		drawLabel(name, rank, x0, y0, color);
+		for (int i = 1; i < NDECADES; i++) {
+			rank = entry.getRank(i);
+			double x1 = x0 + dx;
+			double y1 = yValue(rank);
+			GLine line = new GLine(x0, y0, x1, y1);
+			line.setColor(color);
+			add(line);
+			x0 = x1;
+			y0 = y1;
+			drawLabel(name, rank, x0, y0, color);
+		}
+	}
+	
+	/**
+	 * calculate y value from rank
+	 * @param rank
+	 * @return
+	 */
+	private double yValue(int rank) {
+		if (rank == 0) rank = MAX_RANK;
+		return (getHeight() - 2 * GRAPH_MARGIN_SIZE) * rank / MAX_RANK + GRAPH_MARGIN_SIZE;
+	}
+	
+	/**
+	 * draw name label with rank at x/y in color
+	 * @param name
+	 * @param rank
+	 * @param x
+	 * @param y
+	 * @param color
+	 */
+	private void drawLabel(String name, int rank, double x, double y, Color color) {
+		String text = name;
+		if (rank == 0) {
+			text += " *";
+		} else {
+			text += " " + rank;
+		}
+		GLabel label = new GLabel(text, x + LABEL_OFFSET, y - LABEL_OFFSET);
+		label.setColor(color);
+		add (label);
 	}
 
+	/**
+	 * draw grid
+	 */
 	private void drawGrid() {
 		double height = getHeight();
 		double width = getWidth();

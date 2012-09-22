@@ -67,8 +67,10 @@ public class NameSurfer extends Program implements NameSurferConstants {
 			println(entry.getRank(NDECADES));
 			println(entry.toString());*/
 			//println("Graph: \"" + dataBase.findEntry(nameField.getText()) + "\"");
+			graph.addEntry(dataBase.findEntry(nameField.getText()));
 		} else if (source == clearButton) {
 			//println("Clear");
+			graph.clear();
 		}
 	}
 
