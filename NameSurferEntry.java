@@ -11,6 +11,21 @@ import java.util.*;
 
 public class NameSurferEntry implements NameSurferConstants {
 
+	/**
+	 * private constants
+	 */
+	private static final String NAMESTRING_DELIMITER = " ";
+	private static final int DECADE = 10;
+	private static final String TOSTRING_START_RANK = "[";
+	private static final String TOSTRING_STOP_RANK = "]";
+	private static final String TOSTRING_DELIMITER = " ";
+	
+	/**
+	 * private instance variables
+	 */
+	private String name;
+	private TreeMap<Integer,Integer> ranks = new TreeMap<Integer,Integer>();
+	
 	/* Constructor: NameSurferEntry(line) */
 	/**
 	 * Creates a new NameSurferEntry from a data line as it appears
@@ -19,7 +34,18 @@ public class NameSurferEntry implements NameSurferConstants {
 	 * decade.
 	 */
 	public NameSurferEntry(String line) {
-		// You fill this in //
+		Scanner scanner = new Scanner(line);
+		scanner.useDelimiter(NAMESTRING_DELIMITER);
+		if (!scanner.hasNext()) {
+			name = "error";
+			return;
+		}
+		name = scanner.next();
+		int year = START_DECADE;
+		while (scanner.hasNext()) {
+			ranks.put(year, Integer.parseInt(scanner.next()));
+			year += DECADE;
+		}
 	}
 
 	/* Method: getName() */
@@ -27,8 +53,7 @@ public class NameSurferEntry implements NameSurferConstants {
 	 * Returns the name associated with this entry.
 	 */
 	public String getName() {
-		// You need to turn this stub into a real implementation //
-		return null;
+		return name;
 	}
 
 	/* Method: getRank(decade) */
@@ -40,8 +65,9 @@ public class NameSurferEntry implements NameSurferConstants {
 	 * not appear in a decade, the rank value is 0.
 	 */
 	public int getRank(int decade) {
-		// You need to turn this stub into a real implementation //
-		return 0;
+		Integer rank = ranks.get(START_DECADE + DECADE * decade);
+		if (rank == null) return 0;
+		return rank;
 	}
 
 	/* Method: toString() */
@@ -50,8 +76,15 @@ public class NameSurferEntry implements NameSurferConstants {
 	 * NameSurferEntry.
 	 */
 	public String toString() {
-		// You need to turn this stub into a real implementation //
-		return "";
+		String result = name + TOSTRING_DELIMITER + TOSTRING_START_RANK;
+		String next = "";
+		Iterator<Integer> it = ranks.keySet().iterator(); 
+		while (it.hasNext()) {
+			result += next + ranks.get(it.next());
+			next = TOSTRING_DELIMITER;
+		}
+		result += TOSTRING_STOP_RANK;
+		return result;
 	}
 }
 

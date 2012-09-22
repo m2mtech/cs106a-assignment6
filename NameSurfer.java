@@ -52,7 +52,13 @@ public class NameSurfer extends ConsoleProgram implements NameSurferConstants {
 	public void actionPerformed(ActionEvent e) {
 		Object source = e.getSource();
 		if ((source == nameField) || (source == graphButton)) {
-			println("Graph: \"" + nameField.getText() + "\"");
+			//println("Graph: \"" + nameField.getText() + "\"");
+			NameSurferEntry entry = new NameSurferEntry(nameField.getText());
+			println(entry.getName());
+			println(entry.getRank(0));
+			println(entry.getRank(NDECADES - 2));
+			println(entry.getRank(NDECADES));
+			println(entry.toString());
 		} else if (source == clearButton) {
 			println("Clear");
 		}
