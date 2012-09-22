@@ -15,7 +15,6 @@ public class NameSurferEntry implements NameSurferConstants {
 	 * private constants
 	 */
 	private static final String NAMESTRING_DELIMITER = " ";
-	private static final int DECADE = 10;
 	private static final String TOSTRING_START_RANK = "[";
 	private static final String TOSTRING_STOP_RANK = "]";
 	private static final String TOSTRING_DELIMITER = " ";

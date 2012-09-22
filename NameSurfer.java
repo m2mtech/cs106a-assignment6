@@ -9,7 +9,7 @@ import acm.program.*;
 import java.awt.event.*;
 import javax.swing.*;
 
-public class NameSurfer extends ConsoleProgram implements NameSurferConstants {
+public class NameSurfer extends Program implements NameSurferConstants {
 
 	/**
 	 * private constants
@@ -24,6 +24,7 @@ public class NameSurfer extends ConsoleProgram implements NameSurferConstants {
 	private JButton graphButton;
 	private JButton clearButton;
 	private NameSurferDataBase dataBase;
+	private NameSurferGraph graph;
 	
 	/* Method: init() */
 	/**
@@ -32,6 +33,9 @@ public class NameSurfer extends ConsoleProgram implements NameSurferConstants {
 	 */
 	public void init() {
 		dataBase = new NameSurferDataBase(NAMES_DATA_FILE);
+		
+		graph = new NameSurferGraph();
+		add(graph);
 		
 		nameField = new JTextField(N_CHARS_NAMEFIELD);
 	    nameField.addActionListener(this);
@@ -62,9 +66,9 @@ public class NameSurfer extends ConsoleProgram implements NameSurferConstants {
 			println(entry.getRank(NDECADES - 2));
 			println(entry.getRank(NDECADES));
 			println(entry.toString());*/
-			println("Graph: \"" + dataBase.findEntry(nameField.getText()) + "\"");
+			//println("Graph: \"" + dataBase.findEntry(nameField.getText()) + "\"");
 		} else if (source == clearButton) {
-			println("Clear");
+			//println("Clear");
 		}
 	}
 
