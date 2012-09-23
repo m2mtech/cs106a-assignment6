@@ -17,16 +17,28 @@ public class NameSurferGraph extends GCanvas
 implements NameSurferConstants, ComponentListener {
 
 	/**
+	 * private data types
+	 */
+	private enum Marker {
+		CIRCLE, SQUARE, TRIANGLE, DIAMOND
+	}
+
+	/**
 	 * private constants
 	 */
 	private static final int LABEL_OFFSET = 3;
 	private static final Color[] COLORS = {Color.BLACK, Color.RED, Color.BLUE, Color.MAGENTA};
 	private static final int N_COLORS = 4;
-	
+	private static final int N_MARKERS = 4;
+	private static final double SIZE_MARKER = 10.0;
+
 	/**
 	 * private instance variables
 	 */
 	private ArrayList<NameSurferEntry> data = new ArrayList<NameSurferEntry>();
+	private TreeMap<Integer,String> topName = new TreeMap<Integer,String>();
+	private TreeMap<Integer,Integer> topRank = new TreeMap<Integer,Integer>();
+
 
 	/**
 	 * Creates a new NameSurferGraph object that displays the data.
@@ -56,9 +68,23 @@ implements NameSurferConstants, ComponentListener {
 		if (data.contains(entry)) return;
 		data.add(entry);
 		//System.out.println(entry);
-		update();
-	}
+		
+		String name = entry.getName();
+		for (int i = 0; i < NDECADES; i++) {
+			int rank = entry.getRank(i);
+			if (rank == 0) continue;
+			if (!topRank.containsKey(i)) {
+				topRank.put(i, rank);
+				topName.put(i, name);
+			} else if (rank < topRank.get(i)) {
+				topRank.put(i, rank);
+				topName.put(i, name);				
+			}
+		}	
 
+		update();
+
+	}
 
 	/**
 	 * Updates the display image by deleting all the graphical objects
@@ -75,7 +101,7 @@ implements NameSurferConstants, ComponentListener {
 			drawEntry(it.next());
 		}
 	}
-	
+
 	/**
 	 * draw graph of entry
 	 * @param entry
@@ -86,8 +112,11 @@ implements NameSurferConstants, ComponentListener {
 		double dx = getWidth() * 1.0 / NDECADES;
 		double x0 = 0;
 		double y0 = yValue(rank);
-		Color color = COLORS[data.indexOf(entry) % N_COLORS];
-		drawLabel(name, rank, x0, y0, color);
+		int index = data.indexOf(entry);
+		Color color = COLORS[index % N_COLORS];
+		Marker marker = Marker.values()[index  % N_MARKERS];
+		drawLabel(name, rank, 0, x0, y0, color);
+		drawMarker(marker, x0, y0, color);
 		for (int i = 1; i < NDECADES; i++) {
 			rank = entry.getRank(i);
 			double x1 = x0 + dx;
@@ -97,10 +126,53 @@ implements NameSurferConstants, ComponentListener {
 			add(line);
 			x0 = x1;
 			y0 = y1;
-			drawLabel(name, rank, x0, y0, color);
+			drawLabel(name, rank, i, x0, y0, color);
+			drawMarker(marker, x0, y0, color);
 		}
 	}
-	
+
+	/**
+	 * draw a marker of type centered at x/y in given color
+	 * @param type
+	 * @param x
+	 * @param y
+	 * @param color
+	 */
+	private void drawMarker(Marker type, double x, double y, Color color) {
+		GObject marker;
+		GPen helper;
+		double halfSize = SIZE_MARKER / 2.0; 
+		double x0 = x - halfSize - 0.5;
+		double y0 = y - halfSize - 0.5;
+		switch (type) {
+		case CIRCLE:
+			marker = new GOval(x0, y0, SIZE_MARKER, SIZE_MARKER);
+			break;
+		case SQUARE:
+			marker = new GRect(x0, y0, SIZE_MARKER, SIZE_MARKER);
+			break;
+		case TRIANGLE:
+			helper = new GPen(x, y0);
+			helper.drawLine(halfSize, SIZE_MARKER);
+			helper.drawLine(-SIZE_MARKER, 0);
+			helper.drawLine(halfSize, -SIZE_MARKER);
+			marker = helper;
+			break;
+		case DIAMOND:
+			helper = new GPen(x, y0);
+			helper.drawLine(halfSize, halfSize);
+			helper.drawLine(-halfSize, halfSize);
+			helper.drawLine(-halfSize, -halfSize);
+			helper.drawLine(halfSize, -halfSize);
+			marker = helper;
+			break;
+		default:
+			return;
+		}
+		marker.setColor(color);
+		add(marker);		
+	}
+
 	/**
 	 * calculate y value from rank
 	 * @param rank
@@ -110,16 +182,17 @@ implements NameSurferConstants, ComponentListener {
 		if (rank == 0) rank = MAX_RANK;
 		return (getHeight() - 2 * GRAPH_MARGIN_SIZE) * rank / MAX_RANK + GRAPH_MARGIN_SIZE;
 	}
-	
+
 	/**
 	 * draw name label with rank at x/y in color
 	 * @param name
 	 * @param rank
+	 * @param index
 	 * @param x
 	 * @param y
 	 * @param color
 	 */
-	private void drawLabel(String name, int rank, double x, double y, Color color) {
+	private void drawLabel(String name, int rank, int index, double x, double y, Color color) {
 		String text = name;
 		if (rank == 0) {
 			text += " *";
@@ -127,8 +200,22 @@ implements NameSurferConstants, ComponentListener {
 			text += " " + rank;
 		}
 		GLabel label = new GLabel(text, x + LABEL_OFFSET, y - LABEL_OFFSET);
+		if (isTopRank(name, index)) {
+			label.setFont(label.getFont().deriveFont(Font.BOLD));
+		}
 		label.setColor(color);
 		add (label);
+	}
+	
+	/**
+	 * check if name has the top rank of the given decade
+	 * @param name
+	 * @param index
+	 * @return
+	 */
+	private boolean isTopRank(String name, int index) {
+		if (!topName.containsKey(index)) return false;
+		return name.equals(topName.get(index));
 	}
 
 	/**
