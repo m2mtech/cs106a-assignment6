@@ -268,7 +268,19 @@ implements NameSurferConstants, ComponentListener {
 			label.setFont(label.getFont().deriveFont(Font.BOLD));
 		}
 		label.setColor(colors.get(name));
+		
+		adjustSizeOfLabel(label);
+		
 		add (label);
+	}
+	
+	private void adjustSizeOfLabel(GLabel label) {
+		double dx = getWidth() * 0.85 / NDECADES;
+		double labelWidth = label.getWidth();
+		if (labelWidth > dx) {
+			Font font = label.getFont();
+			label.setFont(font.deriveFont((float) (dx * font.getSize() / labelWidth)));
+		}		
 	}
 	
 	/**
@@ -318,7 +330,9 @@ implements NameSurferConstants, ComponentListener {
 		double yText = height - GRAPH_MARGIN_SIZE / 3;
 		for (int i = 0; i < NDECADES; i++) {
 			add(new GLine(x, 0, x, height));
-			add(new GLabel(" " + year, x, yText));
+			GLabel label = new GLabel(" " + year, x, yText);
+			adjustSizeOfLabel(label);
+			add(label);
 			x += columnWidth;
 			year += DECADE;
 		}
