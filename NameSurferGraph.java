@@ -38,7 +38,10 @@ implements NameSurferConstants, ComponentListener {
 	private ArrayList<NameSurferEntry> data = new ArrayList<NameSurferEntry>();
 	private TreeMap<Integer,String> topName = new TreeMap<Integer,String>();
 	private TreeMap<Integer,Integer> topRank = new TreeMap<Integer,Integer>();
-
+	private HashMap<String,Color> colors = new HashMap<String,Color>();
+	private int colorIndex = 0;
+	private HashMap<String,Marker> markers = new HashMap<String,Marker>();
+	private int markerIndex = 0;
 
 	/**
 	 * Creates a new NameSurferGraph object that displays the data.
@@ -69,21 +72,70 @@ implements NameSurferConstants, ComponentListener {
 		data.add(entry);
 		//System.out.println(entry);
 		
+		for (int i = 0; i < NDECADES; i++) {
+			addTopRank(entry, i);
+		}	
+		
+		String name = entry.getName();
+		colors.put(name, nextColor());
+		markers.put(name, nextMarker());
+	
+		update();
+	}
+	
+	/**
+	 * helper method to get the next unused color
+	 */
+	private Color nextColor() {
+		return COLORS[colorIndex++ % N_COLORS];	
+	}
+
+	/** 
+	 * helper method to get the next unused marker style
+	 */
+	private Marker nextMarker() {
+		return Marker.values()[markerIndex++  % N_MARKERS];	
+	}
+	
+	/**
+	 * add the top rank if applicable
+	 */
+	private void addTopRank(NameSurferEntry entry, int i) {
+		int rank = entry.getRank(i);
+		if (rank == 0) return;
+		if (!topRank.containsKey(i)) {
+			topRank.put(i, rank);
+			topName.put(i, entry.getName());
+		} else if (rank < topRank.get(i)) {
+			topRank.put(i, rank);
+			topName.put(i, entry.getName());				
+		}
+	}
+	
+	/**
+	 * remove entry from display
+	 * @param entry
+	 */
+	public void removeEntry(NameSurferEntry entry) {
+		if (!data.contains(entry)) return;
+		data.remove(entry);
+		
 		String name = entry.getName();
 		for (int i = 0; i < NDECADES; i++) {
-			int rank = entry.getRank(i);
-			if (rank == 0) continue;
-			if (!topRank.containsKey(i)) {
-				topRank.put(i, rank);
-				topName.put(i, name);
-			} else if (rank < topRank.get(i)) {
-				topRank.put(i, rank);
-				topName.put(i, name);				
+			if (!topRank.containsKey(i)) continue;
+			if (!name.equals(topName.get(i))) continue;
+			topRank.remove(i);
+			topName.remove(i);
+			Iterator<NameSurferEntry> it = data.iterator();
+			while (it.hasNext()) {
+				addTopRank(it.next(), i);
 			}
-		}	
-
+		}
+		
+		colors.remove(name);
+		markers.remove(name);
+	
 		update();
-
 	}
 
 	/**
@@ -112,9 +164,8 @@ implements NameSurferConstants, ComponentListener {
 		double dx = getWidth() * 1.0 / NDECADES;
 		double x0 = 0;
 		double y0 = yValue(rank);
-		int index = data.indexOf(entry);
-		Color color = COLORS[index % N_COLORS];
-		Marker marker = Marker.values()[index  % N_MARKERS];
+		Color color = colors.get(name);
+		Marker marker = markers.get(name);
 		drawLabel(name, rank, 0, x0, y0, color);
 		drawMarker(marker, x0, y0, color);
 		for (int i = 1; i < NDECADES; i++) {

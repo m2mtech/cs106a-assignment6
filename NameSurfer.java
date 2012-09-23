@@ -23,6 +23,7 @@ public class NameSurfer extends Program implements NameSurferConstants {
 	private JTextField nameField;
 	private JButton graphButton;
 	private JButton clearButton;
+	private JButton deleteButton;
 	private NameSurferDataBase dataBase;
 	private NameSurferGraph graph;
 	
@@ -40,11 +41,13 @@ public class NameSurfer extends Program implements NameSurferConstants {
 		nameField = new JTextField(N_CHARS_NAMEFIELD);
 	    nameField.addActionListener(this);
 	    graphButton = new JButton("Graph");
+	    deleteButton = new JButton("Delete");
 	    clearButton = new JButton("Clear");
 	   
 	    add(new JLabel("Name:"), POSITION_OF_INTERACTORS);
 	    add(nameField, POSITION_OF_INTERACTORS);
 	    add(graphButton, POSITION_OF_INTERACTORS);
+	    add(deleteButton, POSITION_OF_INTERACTORS);
 	    add(clearButton, POSITION_OF_INTERACTORS);
 	    
 		addActionListeners();
@@ -71,6 +74,8 @@ public class NameSurfer extends Program implements NameSurferConstants {
 		} else if (source == clearButton) {
 			//println("Clear");
 			graph.clear();
+		} else if (source == deleteButton) {
+			graph.removeEntry(dataBase.findEntry(nameField.getText()));
 		}
 	}
 
