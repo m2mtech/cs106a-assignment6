@@ -26,11 +26,12 @@ implements NameSurferConstants, ComponentListener {
 	/**
 	 * private constants
 	 */
-	private static final int LABEL_OFFSET = 3;
+	private static final int LABEL_OFFSET = 5;
 	private static final Color[] COLORS = {Color.BLACK, Color.RED, Color.BLUE, Color.MAGENTA};
 	private static final int N_COLORS = 4;
 	private static final int N_MARKERS = 4;
 	private static final double SIZE_MARKER = 10.0;
+	private static final int MAX_LABEL_SHIFTS = 20;
 
 	/**
 	 * private instance variables
@@ -166,7 +167,7 @@ implements NameSurferConstants, ComponentListener {
 		double y0 = yValue(rank);
 		Color color = colors.get(name);
 		Marker marker = markers.get(name);
-		drawLabel(name, rank, 0, x0, y0, color);
+		drawLabel(entry, 0, x0, y0);
 		drawMarker(marker, x0, y0, color);
 		for (int i = 1; i < NDECADES; i++) {
 			rank = entry.getRank(i);
@@ -177,7 +178,7 @@ implements NameSurferConstants, ComponentListener {
 			add(line);
 			x0 = x1;
 			y0 = y1;
-			drawLabel(name, rank, i, x0, y0, color);
+			drawLabel(entry, i, x0, y0);
 			drawMarker(marker, x0, y0, color);
 		}
 	}
@@ -243,19 +244,55 @@ implements NameSurferConstants, ComponentListener {
 	 * @param y
 	 * @param color
 	 */
-	private void drawLabel(String name, int rank, int index, double x, double y, Color color) {
+	private void drawLabel(NameSurferEntry entry, int index, double x, double y) {
+		String name = entry.getName();
 		String text = name;
+		int rank = entry.getRank(index);
 		if (rank == 0) {
 			text += " *";
 		} else {
 			text += " " + rank;
 		}
 		GLabel label = new GLabel(text, x + LABEL_OFFSET, y - LABEL_OFFSET);
+		int nextRank = entry.getRank(index + 1); 
+		double labelHeight = label.getHeight() + LABEL_OFFSET;
+		if ((rank > nextRank) && (nextRank != 0)) {
+			label.move(0, labelHeight + LABEL_OFFSET);
+		}
+		for (int i = 0; i < MAX_LABEL_SHIFTS; i++) {
+			int dy = labelCollission(label);
+			if (dy == 0) break;
+			label.move(0, dy * labelHeight);
+		}		
 		if (isTopRank(name, index)) {
 			label.setFont(label.getFont().deriveFont(Font.BOLD));
 		}
-		label.setColor(color);
+		label.setColor(colors.get(name));
 		add (label);
+	}
+	
+	/**
+	 * check if label is colliding with other labels
+	 * @param label
+	 * @return
+	 */
+	private int labelCollission(GLabel label) {
+		double x = label.getX();
+		double y = label.getY();
+		GObject object;
+		boolean bottomBlocked = false;
+		boolean topBlocked = false;
+
+		object = getElementAt(x, y);
+		if ((object != null) && (object instanceof GLabel)) bottomBlocked = true;
+		object = getElementAt(x, y - label.getAscent());
+		if ((object != null) && (object instanceof GLabel)) topBlocked = true;
+		if (!topBlocked) {
+			if (!bottomBlocked) return 0;
+			return -1;
+		}
+		if (!bottomBlocked) return 1;
+		return -1; 
 	}
 	
 	/**
